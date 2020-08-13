@@ -4,13 +4,14 @@ import java.util.Comparator;
 
 public class WorkWithPetsCardFile {
     public static void main(String[] args) {
+
         PetsCardFile petsCardFile = new PetsCardFile();
 
         for (int i = 0; i < 10; i++){
             petsCardFile.addPet(DataGenerationUtil.generatePet());
         }
 
-        System.out.println(petsCardFile.pets);
+        System.out.println(petsCardFile.getPets());
 
         Comparator<Pet> comparator = new Comparator<Pet>() {
             @Override
