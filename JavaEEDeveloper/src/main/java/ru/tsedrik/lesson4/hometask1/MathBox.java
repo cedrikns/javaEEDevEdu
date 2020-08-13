@@ -5,31 +5,26 @@ import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Iterator;
 
-public class MathBox<T extends Number> extends ObjectBox{
+public class MathBox<T extends Number> extends ObjectBox<T>{
 
     public MathBox (T[] numbers){
-        this.objects = new HashSet<Number>();
         for (int i = 0; i < numbers.length; i++){
-            if (numbers[i] != null) {
-                this.objects.add(numbers[i]);
+            T curNum = numbers[i];
+            if (curNum != null) {
+                if (objects.contains(curNum)){
+                    throw new DublicatedNumberException();
+                }
+                this.objects.add(curNum);
             }
         }
     }
 
-    @Override
-    public void addObject(Object o) {
-        if (!(o instanceof Number)){
-            throw new IllegalArgumentException("the type must be <? extends Number>");
-        }
-        super.addObject(o);
-    }
-
-    public Number summator(){
+    public T summator(){
         Number sum = 0;
         for (Object num : objects){
             sum = sumTwoNums((T)sum, (T) num);
         }
-        return sum;
+        return (T)sum;
     }
 
     private Number sumTwoNums(T n1, T n2){
@@ -45,9 +40,9 @@ public class MathBox<T extends Number> extends ObjectBox{
     }
 
     public void splitter(T divider){
-        HashSet<Number> set = new HashSet<>();
-        for (Object num: objects){
-            set.add(divideTwoNums(divider, (T) num));
+        HashSet<T> set = new HashSet<>();
+        for (T num: objects){
+            set.add((T)divideTwoNums(divider, num));
         }
         objects = set;
     }
@@ -62,7 +57,7 @@ public class MathBox<T extends Number> extends ObjectBox{
     }
 
     public void deleteNum(Integer num){
-        Iterator<Number> iterator = objects.iterator();
+        Iterator<T> iterator = objects.iterator();
         while (iterator.hasNext()){
             Number curNum = iterator.next();
             if (curNum.toString().equals(num.toString())){
