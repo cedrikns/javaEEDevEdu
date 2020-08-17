@@ -34,7 +34,7 @@ public class Person implements Comparable<Person>{
     }
 
     public Person(int age, Sex sex, String name) {
-        this.age = age;
+        setAge(age);
         this.sex = sex;
         this.name = name;
     }
@@ -45,12 +45,13 @@ public class Person implements Comparable<Person>{
         if (!(o instanceof Person)) return false;
         Person person = (Person) o;
         return age == person.age &&
+                sex == person.sex &&
                 name.equals(person.name);
     }
 
     @Override
     public int hashCode() {
-        return age + 3 * name.hashCode();
+        return age + 3 * name.hashCode() + 5 * sex.ordinal();
     }
 
     @Override
@@ -64,7 +65,7 @@ public class Person implements Comparable<Person>{
 
     @Override
     public int compareTo(Person o) {
-        int sexCompareResult = sex.ordinal() - o.sex.ordinal();
+        int sexCompareResult = sex.compareTo(o.sex);
         if (sexCompareResult != 0){
             return sexCompareResult;
         }

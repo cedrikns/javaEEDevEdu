@@ -1,17 +1,18 @@
 package ru.tsedrik.lesson5.hometask1;
 
 import ru.tsedrik.lesson5.hometask1.exceptions.DublicatePetException;
+import ru.tsedrik.lesson5.hometask1.exceptions.PetNotFoundException;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class PetsCardFile {
-    public HashMap<UUID, Pet> pets = new HashMap<>();
-    public HashMap<String, ArrayList<Pet>> petsByName = new HashMap<>();
+    private Map<UUID, Pet> pets = new HashMap<>();
+    private Map<String, List<Pet>> petsByName = new HashMap<>();
 
-    public void addPet(String name, Person owner, double weight){
+    public UUID addPet(String name, Person owner, double weight){
         Pet newPet = new Pet(name, owner, weight);
         addPet(newPet);
+        return newPet.getId();
     }
 
     public void addPet(Pet newPet){
@@ -19,17 +20,20 @@ public class PetsCardFile {
             throw new DublicatePetException();
         }
         pets.put(newPet.getId(), newPet);
+
         String petName = newPet.getName();
-        if (petsByName.containsKey(petName)){
-            petsByName.get(petName).add(newPet);
-        } else {
-            ArrayList<Pet> list = new ArrayList<>();
-            list.add(newPet);
-            petsByName.put(petName, list);
-        }
+        petsByName.computeIfAbsent(petName, key -> new ArrayList<>()).add(newPet);
+
+//        if (petsByName.containsKey(petName)){
+//            petsByName.get(petName).add(newPet);
+//        } else {
+//            List<Pet> list = new ArrayList<>();
+//            list.add(newPet);
+//            petsByName.put(petName, list);
+//        }
     }
 
-    public ArrayList<Pet> searchPet(String name){
+    public List<Pet> searchPet(String name){
         return petsByName.get(name);
     }
 
@@ -38,7 +42,7 @@ public class PetsCardFile {
             Pet curPet = pets.get(id);
             curPet.setName(newName);
         } else {
-            System.out.println("There was not found pet with id = " + id + " in the card-file");
+            throw new PetNotFoundException("There was not found pet with id = " + id + " in the card-file");
         }
     }
 
@@ -48,7 +52,7 @@ public class PetsCardFile {
             Pet curPet = pets.get(id);
             curPet.setWeight(newWeight);
         } else {
-            System.out.println("There was not found pet with id = " + id + " in the card-file");
+            throw new PetNotFoundException("There was not found pet with id = " + id + " in the card-file");
         }
     }
 
@@ -57,7 +61,7 @@ public class PetsCardFile {
             Pet curPet = pets.get(id);
             curPet.setOwner(newOwner);
         } else {
-            System.out.println("There was not found pet with id = " + id + " in the card-file");
+            throw new PetNotFoundException("There was not found pet with id = " + id + " in the card-file");
         }
     }
 
@@ -68,7 +72,7 @@ public class PetsCardFile {
             curPet.setWeight(tmpPet.getWeight());
             curPet.setOwner(tmpPet.getOwner());
         } else {
-            System.out.println("There was not found pet with id = " + id + " in the card-file");
+            throw new PetNotFoundException("There was not found pet with id = " + id + " in the card-file");
         }
     }
 
@@ -85,4 +89,7 @@ public class PetsCardFile {
         return petsList;
     }
 
+    public Map<UUID, Pet> getPets() {
+        return new HashMap<>(pets);
+    }
 }
