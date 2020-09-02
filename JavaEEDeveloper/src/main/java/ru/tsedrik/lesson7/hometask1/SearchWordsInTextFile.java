@@ -33,7 +33,6 @@ public class SearchWordsInTextFile {
             Set<String> uniqueWords = Files.readAllLines(inFile, StandardCharsets.UTF_8).stream()
                     .flatMap(s -> Arrays.stream(s.split("[^a-zA-Zа-яА-Я0-9_]+")))
                     .map(String::toLowerCase)
-                    .sorted()
                     .collect(Collectors.toCollection(TreeSet::new));
 
             for (String s : uniqueWords){
