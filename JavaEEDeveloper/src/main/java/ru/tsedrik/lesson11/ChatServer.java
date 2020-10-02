@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ChatServer {
     private static Map<String, ClientConnection> clients = new ConcurrentHashMap<>();
-    ServerSocket serverSocket;
+    private ServerSocket serverSocket;
 
     public static void main(String[] args) throws Exception{
         ChatServer server = new ChatServer();

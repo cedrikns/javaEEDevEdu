@@ -12,36 +12,44 @@ public class ChatClient {
 
     public static void main(String[] args){
         ChatClient client = new ChatClient();
-        try{
-            client.socket = new Socket("localhost", 2000);
-            client.toServerWriter = new BufferedWriter(new OutputStreamWriter(client.socket.getOutputStream()));
-            client.fromServerReader = new BufferedReader(new InputStreamReader(client.socket.getInputStream()));
+        client.work();
+    }
 
-            ServerReader serverReader = client.new ServerReader();
+    public void work(){
+        try {
+            socket = new Socket("localhost", 2000);
+            toServerWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            fromServerReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            ServerReader serverReader = new ServerReader();
             serverReader.start();
 
-            client.scanner = new Scanner(System.in);
+            scanner = new Scanner(System.in);
             String clientMsg;
-            try {
-                while ((clientMsg = client.scanner.nextLine()) != "") {
-                    client.toServerWriter.write(clientMsg);
-                    client.toServerWriter.newLine();
-                    client.toServerWriter.flush();
 
-                    if ("quit".equals(clientMsg)) {
-                        Thread.sleep(1000);
-                        break;
-                    }
+            while (!(clientMsg = scanner.nextLine()).equals("")) {
+                toServerWriter.write(clientMsg);
+                toServerWriter.newLine();
+                toServerWriter.flush();
+
+                if ("quit".equals(clientMsg)) {
+                    Thread.sleep(1000);
+                    break;
                 }
+            }
+
+        } catch (IOException e){
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            try {
+                toServerWriter.close();
+                fromServerReader.close();
+                socket.close();
             } catch (IOException e){
                 e.printStackTrace();
             }
-
-            client.toServerWriter.close();
-            client.fromServerReader.close();
-            client.socket.close();
-        } catch (Exception e){
-            e.printStackTrace();
         }
     }
 
