@@ -1,34 +1,74 @@
 package ru.tsedrik.lesson13.hometask2;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class OOMEMetaspace {
-    static List<ClassLoader> loaders = new ArrayList<>();
-
     public static void main(String[] args) throws Exception{
-//        while (true) {
-            CustomClassLoader cl = new CustomClassLoader();
-            loaders.add(cl);
-            System.out.println(loaders.size());
-            try {
-                Class<?> cla = cl.loadClass("ru.tsedrik.lesson13.hometask2.Test");
-                Test test = (Test)cla.newInstance();
-                System.out.println(cla.getClassLoader());
-                test.d++;
-                Class<?> cla2 = cl.loadClass("ru.tsedrik.lesson13.hometask2.Test2");
-                Test test2 = (Test)cla.newInstance();
-                test2.d++;
-                System.out.println("One tr done");
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-//        }
+        //package where to compile SomeClass.java
+        String workerClassPackage = Worker.class.getPackage().getName();
+        System.out.println("workerClassPackage = " + workerClassPackage);
 
-//        Object.class.getPackage().
-//        for (Class c : Object.class.getClasses()){
-//            System.out.println(c.getName());
-//        }
+        //create SomeClass.java file
+        File file = new File("SomeClass");
+
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(file.getName() + ".java"))){
+
+            bw.write("package " + workerClassPackage + ";");
+            bw.newLine();
+            bw.write("public class SomeClass implements Worker{");
+            bw.newLine();
+            bw.write("\tstatic{System.out.println(\"In static init section\");}");
+            bw.newLine();
+            bw.write("\tpublic void doWork(){");
+            bw.newLine();
+            bw.write("\t\tSystem.out.println(\"In doWork method.\");");
+            bw.newLine();
+            bw.write("\t}");
+            bw.newLine();
+            bw.write("}");
+            bw.newLine();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+        //compile SomeClass.java file
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        compiler.run(null, null, null, file.getPath() + ".java");
+
+        //copy compiled SomeClass.class into the correct destination
+        Path fileForCopy = Paths.get(file.getPath() + ".class");
+        System.out.println("fileForCopy = " + fileForCopy);
+        Path workerPath = Paths.get(Worker.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        System.out.println("workerPath = " + workerPath);
+        String workerPackagePath = workerClassPackage.replace('.', File.separatorChar);
+        System.out.println("workerPackagePath = " + workerPackagePath);
+
+        try {
+            Files.move(fileForCopy, Paths.get(workerPath.toString(), workerPackagePath, fileForCopy.toString()), StandardCopyOption.REPLACE_EXISTING);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+        CustomClassLoader cl = new CustomClassLoader();
+        try {
+            //load SomeClass.class
+            Class<?> someClass = cl.loadClass(workerClassPackage + "." + file.getPath());
+            //create instance of loaded class and invoke method 'doWork()'
+            Worker worker = (Worker) someClass.newInstance();
+            worker.doWork();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
-
 }
+

@@ -1,9 +1,9 @@
 package ru.tsedrik.lesson13.hometask2;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
 
 public class CustomClassLoader extends ClassLoader{
     @Override
@@ -12,48 +12,20 @@ public class CustomClassLoader extends ClassLoader{
         return defineClass(name, b, 0, b.length);
     }
 
-
-
     private byte[] loadClassFromFile(String fileName)  {
-        String fileName1 = fileName.replace('.', File.separatorChar) + ".class";
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(
+                fileName.replace('.', File.separatorChar) + ".class");
+        byte[] buffer;
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        int nextValue = 0;
         try {
-            return Files.readAllBytes(Paths.get(fileName1));
+            while ( (nextValue = inputStream.read()) != -1 ) {
+                byteStream.write(nextValue);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        catch (IOException e) {
-            throw new RuntimeException("Unable to read file from disk");
-        }
+        buffer = byteStream.toByteArray();
+        return buffer;
     }
-
-//    protected Class<?> loadClass(String name, boolean resolve)
-//            throws ClassNotFoundException {
-//
-//        synchronized (getClassLoadingLock(name)) {
-//            // First, check if the class has already been loaded
-//            Class<?> c = findLoadedClass(name);
-//            if (c == null) {
-//                long t0 = System.nanoTime();
-//                try {
-//                    if (parent != null) {
-//                        c = parent.loadClass(name, false);
-//                    } else {
-//                        c = findBootstrapClassOrNull(name);
-//                    }
-//                } catch (ClassNotFoundException e) {
-//                    // ClassNotFoundException thrown if class not found
-//                    // from the non-null parent class loader
-//                }
-//
-//                if (c == null) {
-//                    // If still not found, then invoke findClass in order
-//                    // to find the class.
-//                    c = findClass(name);
-//                }
-//            }
-//            if (resolve) {
-//                resolveClass(c);
-//            }
-//            return c;
-//        }
-//    }
-//
 }
