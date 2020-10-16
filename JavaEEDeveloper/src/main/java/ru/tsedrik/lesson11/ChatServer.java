@@ -102,12 +102,17 @@ public class ChatServer {
         }
 
         private void close(){
-            try {
-                clientWriter.close();
-                clientReader.close();
-                clientSocket.close();
-            } catch (IOException e){
-                e.printStackTrace();
+            closeQuietly(clientWriter);
+            closeQuietly(clientReader);
+            closeQuietly(clientSocket);
+        }
+
+        private void closeQuietly(Closeable closeable) {
+            if (closeable != null) {
+                try {
+                    closeable.close();
+                } catch (IOException ex) {
+                }
             }
         }
 
