@@ -2,7 +2,7 @@ package ru.tsedrik.lesson10.hometask1;
 
 import java.util.*;
 
-public class ListSorter implements SortingMethods<List<Integer>>{
+public class ListSorter implements SortingMethods<Integer, List<Integer>>{
 
     public List<Integer> bubbleSort(List<Integer> list){
         if (list == null){

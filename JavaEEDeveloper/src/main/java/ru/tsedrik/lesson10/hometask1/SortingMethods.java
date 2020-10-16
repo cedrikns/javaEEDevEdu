@@ -1,6 +1,8 @@
 package ru.tsedrik.lesson10.hometask1;
 
-public interface SortingMethods <T>{
-    public T bubbleSort(T list);
-    public T javaCollectionsSort(T list);
+import java.util.Collection;
+
+public interface SortingMethods <V extends Comparable, T extends Collection<V>>{
+    T bubbleSort(T list);
+    T javaCollectionsSort(T list);
 }
