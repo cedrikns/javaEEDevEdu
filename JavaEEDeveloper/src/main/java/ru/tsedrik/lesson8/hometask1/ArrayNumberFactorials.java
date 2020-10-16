@@ -1,8 +1,7 @@
 package ru.tsedrik.lesson8.hometask1;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class ArrayNumberFactorials {
@@ -25,8 +24,8 @@ public class ArrayNumberFactorials {
         return factorials;
     }
 
-    public static List<BigInteger> getNumbersFactorials(Integer[] numbers){
-        List<BigInteger> factorials = new ArrayList<>();
+    public static Collection<BigInteger> getNumbersFactorialsWithFuture(Integer[] numbers){
+        Map<Integer, BigInteger> factorials = new ConcurrentHashMap();
         ExecutorService service = null;
         long startTime = System.currentTimeMillis();
         try {
@@ -35,37 +34,71 @@ public class ArrayNumberFactorials {
             for (int i = 0; i < numbers.length; i++) {
                 int curIdx = i;
                 int curNum = numbers[curIdx];
+
                 BigInteger result = service.submit(() -> {
                     ForkJoinTask<BigInteger> task = new NumberFactorialTask(curNum);
                     BigInteger factorial = pool.invoke(task);
-//                    System.out.println(curNum + "! = " + factorial);
                     return factorial;
                 }).get();
-                factorials.add(curIdx, result);
+                factorials.put(curIdx, result);
             }
             long endTime = System.currentTimeMillis();
-            System.out.println("Время работы с ExecutorService = " + (endTime - startTime) + " milliseconds");
-        }catch (InterruptedException | ExecutionException e){
+            System.out.println("Время работы с ExecutorService with Future = " + (endTime - startTime) + " milliseconds");
+        }catch (Exception e){
             e.printStackTrace();
         } finally {
             if (service != null) {
                 service.shutdown();
             }
         }
-        return factorials;
+        return factorials.values();
+    }
+
+    public static Collection<BigInteger> getNumbersFactorialsWithCompletableFuture(Integer[] numbers){
+        Map<Integer, BigInteger> factorials = new ConcurrentHashMap();
+        Set<String> threadNames = new CopyOnWriteArraySet<>();
+        long startTime = System.currentTimeMillis();
+        try {
+
+            for (int i = 0; i < numbers.length; i++) {
+                int curIdx = i;
+                int curNum = numbers[curIdx];
+
+                CompletableFuture.supplyAsync(() -> {
+//                    System.out.println(Thread.currentThread().getName());
+                    threadNames.add(Thread.currentThread().getName());
+                    ForkJoinTask<BigInteger> task = new NumberFactorialTask(curNum);
+                    BigInteger factorial =task.invoke();
+                    return factorial;
+                }).thenAccept(b -> {
+                    factorials.put(curIdx, b);
+                });
+            }
+            while (factorials.size() < numbers.length){}
+
+            long endTime = System.currentTimeMillis();
+            System.out.println("Время работы с CompletableFuture = " + (endTime - startTime) + " milliseconds");
+            System.out.println("Количество уникальных потоков: " + threadNames.size());
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return factorials.values();
     }
 
     public static void main(String[] args) {
-        Integer[] numbers = {5, 7, 30, 12, 1, 5, 11, 300, 115, 34};
+//        Integer[] numbers = {5, 7, 30, 12, 1, 5, 11, 300, 115, 34};
 //        Integer[] numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
-//        Integer[] numbers = new Integer[1000];
-//        for (int i = 0; i < 1000; i++) {
-//            numbers[i] = i + 1;
-//        }
+        Integer[] numbers = new Integer[10000];
+        for (int i = 0; i < 10000; i++) {
+            numbers[i] = 100000 + i + 1;
+        }
 
-        System.out.println(getNumbersFactorialsWithoutExecutorService(numbers));
-        System.out.println(getNumbersFactorials(numbers));
+//        getNumbersFactorialsWithoutExecutorService(numbers);
+//        getNumbersFactorialsWithFuture(numbers);
+        getNumbersFactorialsWithCompletableFuture(numbers);
 
     }
 }
