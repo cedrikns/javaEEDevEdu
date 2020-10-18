@@ -10,7 +10,7 @@ public class ProxyTestClass {
         ListSorter sorter = new ListSorter();
         MethodsWorkTimeProxy handle = new MethodsWorkTimeProxy(sorter);
 
-        SortingMethods<List<Integer>> listSorterProxy = (SortingMethods<List<Integer>>) Proxy.newProxyInstance(
+        SortingMethods<Integer, List<Integer>> listSorterProxy = (SortingMethods<Integer, List<Integer>>) Proxy.newProxyInstance(
                 SortingMethods.class.getClassLoader(),
                 sorter.getClass().getInterfaces(),
                 handle);
