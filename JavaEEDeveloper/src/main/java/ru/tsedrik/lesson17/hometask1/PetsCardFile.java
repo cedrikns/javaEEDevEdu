@@ -1,6 +1,7 @@
 package ru.tsedrik.lesson17.hometask1;
 
 import ru.tsedrik.lesson17.hometask1.exceptions.DublicatePetException;
+import ru.tsedrik.lesson17.hometask1.exceptions.NoDefinedSortStrategy;
 import ru.tsedrik.lesson17.hometask1.exceptions.PetNotFoundException;
 import ru.tsedrik.lesson17.hometask1.sortstrategy.SortStrategy;
 
@@ -51,6 +52,9 @@ public class PetsCardFile extends CardFile<UUID, Pet>{
     }
 
     public void sortedPrint(){
+        if (sortStrategy == null){
+            throw new NoDefinedSortStrategy("Sort strategy is not defined!");
+        }
         Collection<Pet> collection =sortStrategy.sort(storage.getAll());
         sortStrategy.sort(collection);
         for (Pet pet : collection){
