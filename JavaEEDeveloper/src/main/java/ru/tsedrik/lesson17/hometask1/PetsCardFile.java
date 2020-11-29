@@ -1,15 +1,13 @@
 package ru.tsedrik.lesson17.hometask1;
 
 import ru.tsedrik.lesson17.hometask1.exceptions.DublicatePetException;
-import ru.tsedrik.lesson17.hometask1.exceptions.NoDefinedSortStrategy;
+import ru.tsedrik.lesson17.hometask1.exceptions.NoDefinedSortStrategyException;
 import ru.tsedrik.lesson17.hometask1.exceptions.PetNotFoundException;
 import ru.tsedrik.lesson17.hometask1.sortstrategy.SortStrategy;
 
 import java.util.*;
 
 public class PetsCardFile extends CardFile<UUID, Pet>{
-
-    private SortStrategy<Pet> sortStrategy;
 
     public PetsCardFile(Storage storage){
         super(storage);
@@ -51,12 +49,11 @@ public class PetsCardFile extends CardFile<UUID, Pet>{
         }
     }
 
-    public void sortedPrint(){
+    public void sortedPrint(SortStrategy<Pet> sortStrategy){
         if (sortStrategy == null){
-            throw new NoDefinedSortStrategy("Sort strategy is not defined!");
+            throw new NoDefinedSortStrategyException("Sort strategy is not defined!");
         }
         Collection<Pet> collection =sortStrategy.sort(storage.getAll());
-        sortStrategy.sort(collection);
         for (Pet pet : collection){
             System.out.println(pet);
         }
@@ -68,7 +65,4 @@ public class PetsCardFile extends CardFile<UUID, Pet>{
         return petsList;
     }
 
-    public void setSortStrategy(SortStrategy<Pet> sortStrategy) {
-        this.sortStrategy = sortStrategy;
-    }
 }

@@ -25,13 +25,11 @@ public class WorkWithPetsCardFile {
         System.out.println();
 
         SortStrategy<Pet> sortStrategy = new SortByPetNameStrategy<>();
-        petsCardFile.setSortStrategy(sortStrategy);
-        petsCardFile.sortedPrint();
+        petsCardFile.sortedPrint(sortStrategy);
         System.out.println();
 
         sortStrategy = new SortByPetOwnerStrategy<>();
-        petsCardFile.setSortStrategy(sortStrategy);
-        petsCardFile.sortedPrint();
+        petsCardFile.sortedPrint(sortStrategy);
         System.out.println();
 
     }
