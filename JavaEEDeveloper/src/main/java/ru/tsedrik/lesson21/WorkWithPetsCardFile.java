@@ -5,7 +5,8 @@ import java.time.LocalDate;
 public class WorkWithPetsCardFile {
     public static void main(String[] args) throws Exception{
 
-        PetsCardFile cardFile = new PetsCardFile("123");
+        PetStorage storage = new FileStorage("storage");
+        PetsCardFile cardFile = new PetsCardFile(storage);
 
         for (int i = 0; i < 5; i++){
             cardFile.add(DataGenerationUtil.generatePet());

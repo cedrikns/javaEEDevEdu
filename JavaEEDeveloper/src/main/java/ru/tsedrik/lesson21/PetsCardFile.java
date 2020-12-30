@@ -7,9 +7,9 @@ import java.util.*;
 
 public class PetsCardFile{
 
-    private FileStorage storage;
-    public PetsCardFile(String fileName){
-        storage = new FileStorage(fileName);
+    private PetStorage storage;
+    public PetsCardFile(PetStorage storage){
+        this.storage = storage;
     }
 
     public boolean add(Pet newPet){

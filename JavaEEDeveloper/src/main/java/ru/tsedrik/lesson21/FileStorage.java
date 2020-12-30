@@ -3,17 +3,29 @@ package ru.tsedrik.lesson21;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class FileStorage{
+public class FileStorage implements PetStorage{
     private Path path;
     private ObjectMapper objectMapper;
     private Set<UUID> ids;
+
+    private Function<String, Pet> deserializePet = s -> {
+        try {
+            return objectMapper.readValue(s, Pet.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    };
 
     public FileStorage(String fileName){
         path = Path.of(fileName + ".json");
@@ -21,31 +33,26 @@ public class FileStorage{
                 .findAndAddModules()
                 .build();
         objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
-        ids = new HashSet<>();
-        getAllIds();
+        ids = getAllIds();
     }
 
-    private void getAllIds(){
+    private Set<UUID> getAllIds(){
+        Set<UUID> foundedIds = new HashSet<>();
         if (!Files.exists(path)){
-            return;
+            return foundedIds;
         }
         try {
-            ids = Files.lines(path)
-                    .map(s -> {
-                            Pet pet = null;
-                                try {
-                                    pet = objectMapper.readValue(s, Pet.class);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                return pet.getId();
-                            })
+            foundedIds = Files.lines(path)
+                    .map(deserializePet)
+                    .map(p -> p.getId())
                     .collect(Collectors.toSet());
         }catch (Exception e) {
             e.printStackTrace();
         }
+        return foundedIds;
     }
 
+    @Override
     public boolean add(Pet pet) {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path.toString(), true))){
             bufferedWriter.write(objectMapper.writeValueAsString(pet));
@@ -53,23 +60,18 @@ public class FileStorage{
             ids.add(pet.getId());
         }catch (Exception e){
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
         return true;
     }
 
+    @Override
     public Pet search(UUID id) {
         Pet pet = null;
         if (ids.contains(id)){
             try {
                 pet = Files.lines(path)
-                        .map(s -> {
-                            Pet p = null;
-                            try {
-                                p = objectMapper.readValue(s, Pet.class);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            return p;})
+                        .map(deserializePet)
                         .filter(p -> p.getId().equals(id))
                         .findFirst()
                         .get();
@@ -80,22 +82,18 @@ public class FileStorage{
         return pet;
     }
 
-    public Pet change(Pet t) {
+    @Override
+    public Pet change(Pet pet) {
         throw new UnsupportedOperationException("Not implemented, yet!");
     }
 
+    @Override
     public Collection<Pet> getAll() {
         List<Pet> pets = new ArrayList<>();
         try {
-            pets = Files.lines(path).map(s -> {
-                Pet p = null;
-                try {
-                    p = objectMapper.readValue(s, Pet.class);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return p;
-            }).collect(Collectors.toList());
+            pets = Files.lines(path)
+                    .map(deserializePet)
+                    .collect(Collectors.toList());
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -103,6 +101,7 @@ public class FileStorage{
         return pets;
     }
 
+    @Override
     public boolean delete(Pet pet) {
         throw new UnsupportedOperationException("Not implemented, yet!");
     }
