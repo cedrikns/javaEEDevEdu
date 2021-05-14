@@ -1,5 +1,6 @@
 package ru.tsedrik.service;
 
+import org.hibernate.SessionFactory;
 import ru.tsedrik.dao.CourseDAO;
 import ru.tsedrik.dao.StudentDAO;
 import ru.tsedrik.dao.jdbc.CourseDAOImpl;
@@ -18,9 +19,9 @@ public class CourseServiceImpl implements CourseService{
 
     private StudentDAO studentDAO;
 
-    public CourseServiceImpl() {
-        this.courseDAO = new CourseDAOImpl();
-        this.studentDAO = new StudentDAOImpl();
+    public CourseServiceImpl(SessionFactory sessionFactory) {
+        this.courseDAO = new CourseDAOImpl(sessionFactory);
+        this.studentDAO = new StudentDAOImpl(sessionFactory);
     }
 
     @Override
@@ -51,9 +52,6 @@ public class CourseServiceImpl implements CourseService{
         if (course == null){
             throw new RuntimeException("There wasn't found course with id = " + id + ".");
         }
-
-        course.setStudents(studentDAO.getAllByCourseId(id).stream().collect(Collectors.toSet()));
-
         return course;
     }
 
@@ -75,7 +73,7 @@ public class CourseServiceImpl implements CourseService{
             studentDAO.create(enrolledStudent);
         }
 
-        boolean isEnrolled = courseDAO.enroll(courseId, enrolledStudent.getId());
+        boolean isEnrolled = courseDAO.enroll(courseId, enrolledStudent);
 
         return isEnrolled;
     }

@@ -1,0 +1,58 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="1" author="Natallia Tsedrik">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="course"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="course"
+                     remarks="Таблица созданных курсов">
+            <column name="id" type="uuid"
+                    remarks="Идентификатор записи">
+                <constraints primaryKey="true"
+                             primaryKeyName="course_pk"
+                             nullable="false"/>
+            </column>
+            <column name="course_type" type="varchar(255)"
+                    remarks="Тип группы">
+                <constraints nullable="false"/>
+            </column>
+            <column name="begin_date" type="date" remarks="Дата начала курса">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="date" remarks="Дата окончания курса">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_students_count" type="smallint"
+                    remarks="Максимальное количество студентов на курсе">
+                <constraints nullable="false"/>
+            </column>
+            <column name="course_status" type="varchar(255)"
+                    remarks="Тип группы">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <comment>Задача по созданию курсов</comment>
+    </changeSet>
+
+    <changeSet id="2" author="Natallia Tsedrik">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="course" indexName="course_type_date_idx"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="course" indexName="course_type_date_idx">
+            <column name="course_type"/>
+            <column name="begin_date"/>
+            <column name="end_date"/>
+        </createIndex>
+        <comment>Индекс для поиска по типу и дате курса</comment>
+    </changeSet>
+
+</databaseChangeLog>

@@ -2,121 +2,115 @@ package ru.tsedrik.dao.jdbc;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import ru.tsedrik.dao.StudentDAO;
 import ru.tsedrik.entity.Student;
 import ru.tsedrik.exception.MySQLException;
 
-import java.sql.*;
 import java.util.*;
 
 public class StudentDAOImpl implements StudentDAO {
 
     private static final Logger log = LogManager.getLogger(StudentDAOImpl.class.getName());
 
-    private static final String INSERT_STUDENT = "insert into student (id, email, first_name, last_name) values(?, ?, ?, ?)";
-    private static final String UPDATE_STUDENT = "update student set first_name = ?, last_name = ? where student_id = ?";
-    private static final String SELECT_STUDENT_BY_ID = "select * from student where student_id = ?";
-    private static final String SELECT_STUDENT_BY_EMAIL = "select * from student where email = ?";
-    private static final String SELECT_STUDENT_BY_COURSE = "select * from student s join course_student cs on s.id = cs.student_id where course_id = ?";
-    private static final String SELECT_STUDENT_ALL = "select * from student";
-    private static final String DELETE_STUDENT_BY_ID = "delete from student where id = ?";
-    private static final String DELETE_STUDENT_LINK = "delete from course_student where student_id = ?";
+    private SessionFactory sessionFactory;
 
-    public StudentDAOImpl() {
+    public StudentDAOImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
     @Override
     public Student create(Student student) {
-        try(Connection connection = ConnectorDB.getConnection();
-            PreparedStatement statement = connection.prepareStatement(INSERT_STUDENT)){
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = null;
 
-            int i = 1;
-            statement.setObject(i++, student.getId());
-            statement.setString(i++, student.getEmail());
-            statement.setString(i++, student.getFirstName());
-            statement.setString(i++, student.getLastName());
-
-            int result = statement.executeUpdate();
-
-            if (result < 1) {
-                log.info("Student with id = " + student.getId() + " wasn't added.");
-                return null;
+        try {
+            transaction = session.beginTransaction();
+            session.save(student);
+            transaction.commit();
+            log.info("Student with id = " + student.getId() + " was added.");
+            return student;
+        } catch (Exception e){
+            if (transaction != null){
+                transaction.rollback();
             }
-
-        } catch (SQLException e){
             throw new MySQLException("Ошибка при создании студента: " + e.getMessage());
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
-
-        log.info("Student with id = " + student.getId() + " was added.");
-        return student;
     }
 
     @Override
     public Student getById(UUID id) {
-        try(Connection connection = ConnectorDB.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SELECT_STUDENT_BY_ID)){
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = null;
 
-            statement.setObject(1, id);
-
-            try(ResultSet resultSet = statement.executeQuery()) {
-
-                if (resultSet.next()) {
-                    return getStudentFromResultSet(resultSet);
-                } else {
-                    log.info("There wan't found student with id = " + id);
-                    return null;
-                }
-            }
-
-        } catch (SQLException e){
+        try {
+            transaction = session.beginTransaction();
+            Student student = session.get(Student.class, id);
+            transaction.commit();
+            return student;
+        } catch (Exception e){
             throw new MySQLException("Ошибка при получении студента: " + e.getMessage());
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
     @Override
     public Collection<Student> getAll() {
-        try(Connection connection = ConnectorDB.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SELECT_STUDENT_ALL);
-            ResultSet resultSet = statement.executeQuery()){
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = null;
 
-            List<Student> students = new ArrayList<>();
-
-            while (resultSet.next()){
-                students.add(getStudentFromResultSet(resultSet));
-            }
-
+        try {
+            transaction = session.beginTransaction();
+            List<Student> students = session.createQuery("from Student").getResultList();
+            transaction.commit();
             log.info("Was founded " + students.size() + " students.");
-
             return students;
-
-        } catch (SQLException e){
+        } catch (Exception e){
             throw new MySQLException("Ошибка при получении списка студентов: " + e.getMessage());
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
     @Override
     public Student update(Student student) {
-        try(Connection connection = ConnectorDB.getConnection();
-            PreparedStatement statement = connection.prepareStatement(UPDATE_STUDENT)){
 
-            int i = 1;
-            statement.setString(i++, student.getFirstName());
-            statement.setString(i++, student.getLastName());
-            statement.setObject(i++, student.getId());
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = null;
 
-            int result = statement.executeUpdate();
+        try {
+            transaction = session.beginTransaction();
 
-            if (result < 1) {
-                log.info("Student with id = " + student.getId() + " wasn't updated.");
-                return null;
+            Student updatedStudent = session.get(Student.class, student.getId());
+            updatedStudent.setFirstName(student.getFirstName());
+            updatedStudent.setLastName(student.getLastName());
+
+            session.update(updatedStudent);
+            transaction.commit();
+
+            log.info("Student with id = " + student.getId() + " was updated.");
+            return updatedStudent;
+        } catch (Exception e){
+            if (transaction != null){
+                transaction.rollback();
             }
-
-        } catch (SQLException e){
             throw new MySQLException("Ошибка при обновлении студента: " + e.getMessage());
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
-
-        log.info("Student with id = " + student.getId() + " was updated.");
-        return student;
     }
 
     @Override
@@ -127,84 +121,49 @@ public class StudentDAOImpl implements StudentDAO {
     @Override
     public boolean deleteById(UUID id) {
 
-        try(Connection connection = ConnectorDB.getConnection()){
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = null;
 
-            try(PreparedStatement statement = connection.prepareStatement(DELETE_STUDENT_BY_ID);
-            PreparedStatement statementForLink = connection.prepareStatement(DELETE_STUDENT_LINK)) {
-
-                connection.setAutoCommit(false);
-                statementForLink.setObject(1, id);
-                int result = statementForLink.executeUpdate();
-                log.info("Was deleted " + result + " links.");
-
-                statement.setObject(1, id);
-                result = statement.executeUpdate();
-                connection.commit();
-                log.info("Was deleted " + result + " students.");
-                connection.setAutoCommit(true);
-                return result > 0 ? true : false;
-
-            }catch (SQLException e){
-                connection.rollback();
-                throw new MySQLException();
+        try {
+            transaction = session.beginTransaction();
+            Student student = session.get(Student.class, id);
+            session.delete(student);
+            transaction.commit();
+            log.info("Student with id = " + student.getId() + " was deleted.");
+            return true;
+        } catch (Exception e){
+            if (transaction != null){
+                transaction.rollback();
             }
-        } catch (SQLException e){
             throw new MySQLException("Ошибка при удалении студента: " + e.getMessage());
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
     @Override
     public Student getStudentByEmail(String email) {
-        try(Connection connection = ConnectorDB.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SELECT_STUDENT_BY_EMAIL)){
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = null;
 
-            statement.setObject(1, email);
-
-            try(ResultSet resultSet = statement.executeQuery()) {
-
-                if (resultSet.next()) {
-                    return getStudentFromResultSet(resultSet);
-                } else {
-                    log.info("There wan't found student with email = " + email);
-                    return null;
-                }
+        try {
+            transaction = session.beginTransaction();
+            List<Student> students = session.createQuery("from Student as s where s.email = '" + email + "'").getResultList();
+            transaction.commit();
+            if (students.size() > 0) {
+                return students.get(0);
+            } else {
+                log.info("There wan't found student with email = " + email);
+                return null;
             }
-        } catch (SQLException e){
+        } catch (Exception e){
             throw new MySQLException("Ошибка по получению студента: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public Collection<Student> getAllByCourseId(UUID courseId) {
-        try(Connection connection = ConnectorDB.getConnection();
-            PreparedStatement statement = connection.prepareStatement(SELECT_STUDENT_BY_COURSE)){
-
-            statement.setObject(1, courseId);
-
-            try(ResultSet resultSet = statement.executeQuery()) {
-                List<Student> students = new ArrayList<>();
-
-                while (resultSet.next()) {
-                    students.add(getStudentFromResultSet(resultSet));
-                }
-
-                log.info("Was founded " + students.size() + " students on course with id = " + courseId + ".");
-
-                return students;
+        } finally {
+            if (session != null) {
+                session.close();
             }
-
-        } catch (SQLException e){
-            throw new MySQLException("Ошибка при получении списка студентов: " + e.getMessage());
         }
-    }
-
-    private Student getStudentFromResultSet(ResultSet resultSet) throws SQLException{
-        Student student = new Student();
-        int i = 1;
-        student.setId(((UUID)resultSet.getObject(i++)));
-        student.setEmail(resultSet.getString(i++));
-        student.setLastName(resultSet.getString(i++));
-        student.setFirstName(resultSet.getString(i++));
-        return student;
     }
 }

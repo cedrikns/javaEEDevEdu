@@ -1,0 +1,54 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="1" author="Natallia Tsedrik">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="course_student"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="course_student"
+                     remarks="Таблица связи участников и групп">
+            <column name="id" type="integer" autoIncrement="true" generationType="ALWAYS" incrementBy="1"
+                    remarks="Идентификатор записи">
+                <constraints primaryKey="true"
+                             primaryKeyName="course_student_pk"
+                             nullable="false"/>
+            </column>
+            <column name="course_id" type="uuid"
+                    remarks="Идентификатор записи в таблице course">
+                <constraints foreignKeyName="course_id_fk"
+                             referencedTableName="course"
+                             referencedColumnNames="id"
+                             nullable="false"/>
+            </column>
+            <column name="student_id" type="uuid"
+                    remarks="Идентификатор записи в таблице student">
+                <constraints foreignKeyName="student_id_fk"
+                             referencedTableName="student"
+                             referencedColumnNames="id"
+                             nullable="false"/>
+            </column>
+
+        </createTable>
+        <comment>Задача по созданию связи между курсами и студентами</comment>
+    </changeSet>
+
+    <changeSet id="2" author="Natallia Tsedrik">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="course_student" indexName="course_student_idx"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="course_student" indexName="course_student_idx">
+            <column name="course_id"/>
+            <column name="student_id"/>
+        </createIndex>
+        <comment>Составной индекс для join'ов</comment>
+    </changeSet>
+
+</databaseChangeLog>
