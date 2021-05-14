@@ -6,6 +6,7 @@ import ru.tsedrik.dao.CourseDAO;
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
+import ru.tsedrik.exception.MySQLException;
 
 import java.sql.*;
 import java.sql.Date;
@@ -49,8 +50,7 @@ public class CourseDAOImpl implements CourseDAO {
             }
 
         } catch (SQLException e){
-            e.printStackTrace();
-            return null;
+            throw new MySQLException("Ошибка при создании курса: " + e.getMessage());
         }
 
         log.info("Course with id = " + course.getId() + " was added.");
@@ -76,8 +76,7 @@ public class CourseDAOImpl implements CourseDAO {
             }
 
         } catch (SQLException e){
-            e.printStackTrace();
-            return null;
+            throw new MySQLException("Ошибка при получении курса: " + e.getMessage());
         }
     }
 
@@ -98,8 +97,7 @@ public class CourseDAOImpl implements CourseDAO {
             return courses;
 
         } catch (SQLException e){
-            e.printStackTrace();
-            return Collections.EMPTY_LIST;
+            throw new MySQLException("Ошибка при получении списка курсов: " + e.getMessage());
         }
     }
 
@@ -123,8 +121,7 @@ public class CourseDAOImpl implements CourseDAO {
             }
 
         } catch (SQLException e){
-            e.printStackTrace();
-            return null;
+            throw new MySQLException("Ошибка при обновлении курса: " + e.getMessage());
         }
 
         log.info("Course with id = " + course.getId() + " was updated.");
@@ -158,12 +155,10 @@ public class CourseDAOImpl implements CourseDAO {
 
             } catch (SQLException e){
                 connection.rollback();
-                e.printStackTrace();
-                return false;
+                throw new MySQLException("");
             }
         } catch (SQLException e){
-            e.printStackTrace();
-            return false;
+            throw new MySQLException("Ошибка при удалении курса: " + e.getMessage());
         }
     }
 
@@ -184,8 +179,7 @@ public class CourseDAOImpl implements CourseDAO {
                 return courses;
             }
         } catch (SQLException e){
-            e.printStackTrace();
-            return Collections.EMPTY_LIST;
+            throw new MySQLException("Ошибка при получении списка курсов: " + e.getMessage());
         }
     }
 
@@ -206,8 +200,7 @@ public class CourseDAOImpl implements CourseDAO {
             }
 
         } catch (SQLException e){
-            e.printStackTrace();
-            return false;
+            throw new MySQLException("Ошибка во время записи на курс: " + e.getMessage());
         }
 
         log.info("Enroll wasn successful.");

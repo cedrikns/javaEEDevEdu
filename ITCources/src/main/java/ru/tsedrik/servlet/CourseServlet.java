@@ -3,6 +3,7 @@ package ru.tsedrik.servlet;
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
+import ru.tsedrik.exception.MySQLException;
 import ru.tsedrik.service.CourseService;
 import ru.tsedrik.service.CourseServiceImpl;
 
@@ -25,25 +26,29 @@ public class CourseServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String option = req.getServletPath();
-        switch(option){
-            case "/search":
-                openCourseForm(req, resp, "course-search-form.jsp");
-                break;
-            case "/create":
-                openCourseForm(req, resp, "course-create-form.jsp");
-                break;
-            case "/courses-list":
-                coursesList(req, resp);
-                break;
-            case "/show":
-                show(req, resp);
-                break;
-            case "/enroll":
-                enroll(req, resp);
-                break;
-            case "/enroll-confirm":
-                confirmEnroll(req, resp);
-                break;
+        try {
+            switch (option) {
+                case "/search":
+                    openCourseForm(req, resp, "course-search-form.jsp");
+                    break;
+                case "/create":
+                    openCourseForm(req, resp, "course-create-form.jsp");
+                    break;
+                case "/courses-list":
+                    coursesList(req, resp);
+                    break;
+                case "/show":
+                    show(req, resp);
+                    break;
+                case "/enroll":
+                    enroll(req, resp);
+                    break;
+                case "/enroll-confirm":
+                    confirmEnroll(req, resp);
+                    break;
+            }
+        } catch (MySQLException e){
+            req.getRequestDispatcher("error.jsp").forward(req, resp);
         }
     }
 

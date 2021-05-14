@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.tsedrik.dao.StudentDAO;
 import ru.tsedrik.entity.Student;
+import ru.tsedrik.exception.MySQLException;
 
 import java.sql.*;
 import java.util.*;
@@ -43,8 +44,7 @@ public class StudentDAOImpl implements StudentDAO {
             }
 
         } catch (SQLException e){
-            e.printStackTrace();
-            return null;
+            throw new MySQLException("Ошибка при создании студента: " + e.getMessage());
         }
 
         log.info("Student with id = " + student.getId() + " was added.");
@@ -69,8 +69,7 @@ public class StudentDAOImpl implements StudentDAO {
             }
 
         } catch (SQLException e){
-            e.printStackTrace();
-            return null;
+            throw new MySQLException("Ошибка при получении студента: " + e.getMessage());
         }
     }
 
@@ -91,8 +90,7 @@ public class StudentDAOImpl implements StudentDAO {
             return students;
 
         } catch (SQLException e){
-            e.printStackTrace();
-            return Collections.EMPTY_LIST;
+            throw new MySQLException("Ошибка при получении списка студентов: " + e.getMessage());
         }
     }
 
@@ -114,8 +112,7 @@ public class StudentDAOImpl implements StudentDAO {
             }
 
         } catch (SQLException e){
-            e.printStackTrace();
-            return null;
+            throw new MySQLException("Ошибка при обновлении студента: " + e.getMessage());
         }
 
         log.info("Student with id = " + student.getId() + " was updated.");
@@ -149,12 +146,10 @@ public class StudentDAOImpl implements StudentDAO {
 
             }catch (SQLException e){
                 connection.rollback();
-                e.printStackTrace();
-                return false;
+                throw new MySQLException();
             }
         } catch (SQLException e){
-            e.printStackTrace();
-            return false;
+            throw new MySQLException("Ошибка при удалении студента: " + e.getMessage());
         }
     }
 
@@ -175,8 +170,7 @@ public class StudentDAOImpl implements StudentDAO {
                 }
             }
         } catch (SQLException e){
-            e.printStackTrace();
-            return null;
+            throw new MySQLException("Ошибка по получению студента: " + e.getMessage());
         }
     }
 
@@ -200,8 +194,7 @@ public class StudentDAOImpl implements StudentDAO {
             }
 
         } catch (SQLException e){
-            e.printStackTrace();
-            return Collections.EMPTY_LIST;
+            throw new MySQLException("Ошибка при получении списка студентов: " + e.getMessage());
         }
     }
 
