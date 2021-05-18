@@ -1,0 +1,48 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="1" author="Natallia Tsedrik">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="student"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="student"
+                     remarks="Таблица зарегистрированных студентов курсов">
+            <column name="id" type="uuid"
+                    remarks="Идентификатор записи">
+                <constraints primaryKey="true"
+                             primaryKeyName="student_pk"
+                             nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)"
+                    remarks="Электронный адрес студента">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(255)"
+                    remarks="Имя студента">
+            </column>
+            <column name="last_name" type="varchar(255)"
+                    remarks="Фамилия студента">
+            </column>
+        </createTable>
+        <comment>Задача по созданию студента</comment>
+    </changeSet>
+
+    <changeSet id="2" author="Natallia Tsedrik">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="student" indexName="student_email_uidx"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="student" indexName="student_email_uidx" unique="true">
+            <column name="email"/>
+        </createIndex>
+        <comment>Индекс для поиска по электронному адресу</comment>
+    </changeSet>
+
+</databaseChangeLog>

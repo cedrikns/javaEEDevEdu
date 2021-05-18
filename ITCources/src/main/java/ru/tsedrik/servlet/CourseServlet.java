@@ -1,5 +1,9 @@
 package ru.tsedrik.servlet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.hibernate.SessionFactory;
+import ru.tsedrik.dao.jdbc.CourseDAOImpl;
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
@@ -20,6 +24,8 @@ import java.util.UUID;
 
 @WebServlet("/")
 public class CourseServlet extends HttpServlet {
+
+    private static final Logger log = LogManager.getLogger(CourseServlet.class.getName());
 
     private CourseService courseService;
 
@@ -48,6 +54,7 @@ public class CourseServlet extends HttpServlet {
                     break;
             }
         } catch (MySQLException e){
+            log.error(e.getMessage());
             req.getRequestDispatcher("error.jsp").forward(req, resp);
         }
     }
@@ -127,7 +134,8 @@ public class CourseServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        courseService = new CourseServiceImpl();
+        SessionFactory sessionFactory = (SessionFactory)getServletContext().getAttribute("sessionFactory");
+        courseService = new CourseServiceImpl(sessionFactory);
         super.init();
     }
 }

@@ -1,5 +1,6 @@
 package ru.tsedrik.service;
 
+import org.hibernate.SessionFactory;
 import ru.tsedrik.dao.StudentDAO;
 import ru.tsedrik.dao.jdbc.StudentDAOImpl;
 import ru.tsedrik.entity.Student;
@@ -10,8 +11,8 @@ public class StudentServiceImpl implements StudentService{
 
     private StudentDAO studentDAO;
 
-    public StudentServiceImpl(){
-        this.studentDAO = new StudentDAOImpl();
+    public StudentServiceImpl(SessionFactory sessionFactory){
+        this.studentDAO = new StudentDAOImpl(sessionFactory);
     }
 
     @Override

@@ -2,6 +2,7 @@ package ru.tsedrik.dao;
 
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseType;
+import ru.tsedrik.entity.Student;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -18,8 +19,8 @@ public interface CourseDAO extends GenericDAO<Course, UUID>{
     /**
      * Записывает участника на курс.
      * @param courseId  идентификатор курса
-     * @param studentId  идентификатор участника
+     * @param student  записываемый участник
      * @return  успешность записи
      */
-    boolean enroll(UUID courseId, UUID studentId);
+    boolean enroll(UUID courseId, Student student);
 }
