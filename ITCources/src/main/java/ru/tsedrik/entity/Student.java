@@ -1,9 +1,8 @@
 package ru.tsedrik.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -34,6 +33,13 @@ public class Student  implements Identifired<UUID> {
      */
     @Column(name = "last_name")
     private String lastName;
+
+    /**
+     * Список курсов, на которые записался студент
+     */
+    @ManyToMany(cascade={CascadeType.PERSIST}, fetch = FetchType.LAZY)
+    @JoinTable(name="course_student", joinColumns=@JoinColumn(name="student_id"), inverseJoinColumns=@JoinColumn(name="course_id"))
+    private Set<Course> courses;
 
     public Student(){}
 
@@ -81,6 +87,14 @@ public class Student  implements Identifired<UUID> {
         this.email = email.toLowerCase();
     }
 
+    public Set<Course> getCourses() {
+        return courses;
+    }
+
+    public void setCourses(Set<Course> courses) {
+        this.courses = courses;
+    }
+
     @Override
     public String toString() {
         return "Student{" +
@@ -89,5 +103,25 @@ public class Student  implements Identifired<UUID> {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Student student = (Student) o;
+
+        if (!id.equals(student.id)) return false;
+        if (!email.equals(student.email)) return false;
+        if (!Objects.equals(firstName, student.firstName)) return false;
+        return Objects.equals(lastName, student.lastName);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + email.hashCode();
+        return result;
     }
 }

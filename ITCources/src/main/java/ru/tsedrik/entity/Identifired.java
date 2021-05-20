@@ -1,6 +1,8 @@
 package ru.tsedrik.entity;
 
-public interface Identifired <T>{
+import java.io.Serializable;
+
+public interface Identifired <T> extends Serializable {
 
     T getId();
 }

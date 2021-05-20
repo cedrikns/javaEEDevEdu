@@ -3,7 +3,10 @@ package ru.tsedrik.servlet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
+import ru.tsedrik.dao.CourseDAO;
+import ru.tsedrik.dao.StudentDAO;
 import ru.tsedrik.dao.jdbc.CourseDAOImpl;
+import ru.tsedrik.dao.jdbc.StudentDAOImpl;
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
@@ -135,7 +138,9 @@ public class CourseServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         SessionFactory sessionFactory = (SessionFactory)getServletContext().getAttribute("sessionFactory");
-        courseService = new CourseServiceImpl(sessionFactory);
+        CourseDAO courseDAO = new CourseDAOImpl(sessionFactory);
+        StudentDAO studentDAO = new StudentDAOImpl(sessionFactory);
+        courseService = new CourseServiceImpl(courseDAO, studentDAO);
         super.init();
     }
 }
