@@ -93,6 +93,9 @@ public class StudentDAOImpl implements StudentDAO {
             transaction = session.beginTransaction();
 
             Student updatedStudent = session.get(Student.class, student.getId());
+            if (updatedStudent == null){
+                throw new IllegalArgumentException("Wasn't found needed student.");
+            }
             updatedStudent.setFirstName(student.getFirstName());
             updatedStudent.setLastName(student.getLastName());
 

@@ -98,6 +98,9 @@ public class CourseDAOImpl implements CourseDAO {
             transaction = session.beginTransaction();
 
             Course updatedCourse = session.get(Course.class, course.getId());
+            if (updatedCourse == null){
+                throw new IllegalArgumentException("Wasn't found needed course.");
+            }
             updatedCourse.setBeginDate(course.getBeginDate());
             updatedCourse.setEndDate(course.getEndDate());
             updatedCourse.setMaxStudentsCount(course.getMaxStudentsCount());
@@ -182,7 +185,7 @@ public class CourseDAOImpl implements CourseDAO {
             Course course = session.get(Course.class, courseId);
 
             Optional<UUID> existedStudentId = course.getStudents().stream()
-                    .map(s -> s.getId()).peek(System.out::println)
+                    .map(s -> s.getId())
                     .filter(id -> id.equals(student.getId()))
                     .findAny();
             if (existedStudentId.isPresent()){

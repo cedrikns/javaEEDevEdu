@@ -45,7 +45,7 @@ public class Course implements Identifired<UUID>{
     /**
      * Список участников, которые будут обучатья на курсе
      */
-    @ManyToMany(cascade={CascadeType.PERSIST}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade={CascadeType.PERSIST}, fetch = FetchType.LAZY)
     @JoinTable(name="course_student", joinColumns=@JoinColumn(name="course_id"), inverseJoinColumns=@JoinColumn(name="student_id"))
     private Set<Student> students;
 
@@ -135,5 +135,31 @@ public class Course implements Identifired<UUID>{
                 ", maxStudentCount=" + maxStudentsCount +
                 ", courseStatus=" + courseStatus +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Course course = (Course) o;
+
+        if (maxStudentsCount != course.maxStudentsCount) return false;
+        if (!id.equals(course.id)) return false;
+        if (courseType != course.courseType) return false;
+        if (!beginDate.equals(course.beginDate)) return false;
+        if (!endDate.equals(course.endDate)) return false;
+        return courseStatus == course.courseStatus;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + courseType.hashCode();
+        result = 31 * result + beginDate.hashCode();
+        result = 31 * result + endDate.hashCode();
+        result = 31 * result + maxStudentsCount;
+        result = 31 * result + courseStatus.hashCode();
+        return result;
     }
 }
