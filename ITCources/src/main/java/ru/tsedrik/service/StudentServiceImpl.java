@@ -1,10 +1,12 @@
 package ru.tsedrik.service;
 
+import org.springframework.stereotype.Service;
 import ru.tsedrik.dao.StudentDAO;
 import ru.tsedrik.entity.Student;
 
 import java.util.UUID;
 
+@Service
 public class StudentServiceImpl implements StudentService{
 
     private StudentDAO studentDAO;

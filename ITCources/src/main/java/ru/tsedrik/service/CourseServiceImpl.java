@@ -1,5 +1,6 @@
 package ru.tsedrik.service;
 
+import org.springframework.stereotype.Service;
 import ru.tsedrik.dao.CourseDAO;
 import ru.tsedrik.dao.StudentDAO;
 import ru.tsedrik.entity.Course;
@@ -9,6 +10,7 @@ import ru.tsedrik.entity.Student;
 import java.util.Collection;
 import java.util.UUID;
 
+@Service
 public class CourseServiceImpl implements CourseService{
 
     private CourseDAO courseDAO;

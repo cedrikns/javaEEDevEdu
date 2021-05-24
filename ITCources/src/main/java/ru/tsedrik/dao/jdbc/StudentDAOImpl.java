@@ -5,12 +5,14 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.springframework.stereotype.Repository;
 import ru.tsedrik.dao.StudentDAO;
 import ru.tsedrik.entity.Student;
 import ru.tsedrik.exception.MySQLException;
 
 import java.util.*;
 
+@Repository
 public class StudentDAOImpl implements StudentDAO {
 
     private static final Logger log = LogManager.getLogger(StudentDAOImpl.class.getName());

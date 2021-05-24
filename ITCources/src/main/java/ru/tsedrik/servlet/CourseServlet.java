@@ -2,17 +2,11 @@ package ru.tsedrik.servlet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.SessionFactory;
-import ru.tsedrik.dao.CourseDAO;
-import ru.tsedrik.dao.StudentDAO;
-import ru.tsedrik.dao.jdbc.CourseDAOImpl;
-import ru.tsedrik.dao.jdbc.StudentDAOImpl;
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
 import ru.tsedrik.exception.MySQLException;
 import ru.tsedrik.service.CourseService;
-import ru.tsedrik.service.CourseServiceImpl;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -25,12 +19,16 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
-@WebServlet("/")
+@WebServlet(urlPatterns = {"/search", "/create", "/courses-list", "/show", "/enroll", "/enroll-confirm"}, loadOnStartup = 1)
 public class CourseServlet extends HttpServlet {
 
     private static final Logger log = LogManager.getLogger(CourseServlet.class.getName());
 
     private CourseService courseService;
+
+    public CourseServlet(CourseService courseService) {
+        this.courseService = courseService;
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -137,10 +135,6 @@ public class CourseServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        SessionFactory sessionFactory = (SessionFactory)getServletContext().getAttribute("sessionFactory");
-        CourseDAO courseDAO = new CourseDAOImpl(sessionFactory);
-        StudentDAO studentDAO = new StudentDAOImpl(sessionFactory);
-        courseService = new CourseServiceImpl(courseDAO, studentDAO);
         super.init();
     }
 }
