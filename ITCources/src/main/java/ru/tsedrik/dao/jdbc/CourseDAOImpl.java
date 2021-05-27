@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.springframework.stereotype.Repository;
 import ru.tsedrik.dao.CourseDAO;
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseType;
@@ -13,6 +14,7 @@ import ru.tsedrik.exception.MySQLException;
 
 import java.util.*;
 
+@Repository
 public class CourseDAOImpl implements CourseDAO {
 
     private static final Logger log = LogManager.getLogger(CourseDAOImpl.class.getName());

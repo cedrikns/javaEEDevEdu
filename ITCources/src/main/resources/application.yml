@@ -1,0 +1,21 @@
+server:
+  port: ${APP_PORT:8080}
+  servlet:
+    context-path: /it-courses
+    application-display-name: ITCourses
+  tomcat:
+    max-connections: 1000
+    accept-count: 100
+    connection-timeout: 30000
+
+spring:
+  mvc:
+    view:
+      suffix: .jsp
+    log-request-details: true
+
+logging:
+  level:
+    ROOT: INFO
+    ru.tsedrik: DEBUG
+    org.springframework: DEBUG
