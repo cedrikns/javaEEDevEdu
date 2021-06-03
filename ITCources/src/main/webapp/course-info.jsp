@@ -16,7 +16,7 @@
     </br></br>
     Кол-во мест: <%=course.getMaxStudentsCount()%>
     </br></br>
-    <a href="../enroll/<%=course.getId()%>">Запись</a>
+    <a href="${pageContext.request.contextPath}/enroll/<%=course.getId()%>">Запись</a>
 </form>
 </body>
 </html>

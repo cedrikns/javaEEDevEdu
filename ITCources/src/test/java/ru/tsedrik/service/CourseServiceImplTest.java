@@ -6,17 +6,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.tsedrik.dao.CourseDAO;
-import ru.tsedrik.dao.StudentDAO;
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
 import ru.tsedrik.entity.Student;
+import ru.tsedrik.repository.CourseRepository;
+import ru.tsedrik.repository.StudentRepository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,49 +22,50 @@ import static org.junit.jupiter.api.Assertions.*;
 class CourseServiceImplTest {
 
     @Mock
-    CourseDAO courseDAO;
+    CourseRepository courseRepository;
     @Mock
-    StudentDAO studentDAO;
+    StudentRepository studentRepository;
 
     CourseServiceImpl courseService;
 
     @BeforeEach
     void setUp() {
-        courseService = new CourseServiceImpl(courseDAO, studentDAO);
+        courseService = new CourseServiceImpl(courseRepository, studentRepository);
     }
 
     @Test
     void addCourse() {
-        Course course = new Course(UUID.randomUUID(), CourseType.CI, LocalDate.now(), LocalDate.now().plusDays(3), 8, CourseStatus.OPEN);
-        Mockito.when(courseDAO.create(course)).thenReturn(course);
+        Course course = new Course(null, CourseType.CI, LocalDate.now(), LocalDate.now().plusDays(3), 8, null);
+        Mockito.when(courseRepository.save(course)).thenReturn(course);
 
         Course returnedCourse = courseService.addCourse(course);
 
+        assertNotNull(course.getId());
+        assertNotNull(course.getCourseStatus());
         assertNotNull(returnedCourse);
         assertEquals(course, returnedCourse);
-        Mockito.verify(courseDAO).create(course);
+        Mockito.verify(courseRepository).save(course);
     }
 
     @Test
     void addCourseWithNullArg() {
         assertThrows(IllegalArgumentException.class, () -> courseService.addCourse(null));
-        Mockito.verify(courseDAO, Mockito.never()).create(Mockito.any());
+        Mockito.verify(courseRepository, Mockito.never()).save(Mockito.any());
     }
 
     @Test
     void deleteCourse() {
         UUID id = UUID.randomUUID();
         Course course = new Course(id, CourseType.CI, LocalDate.now(), LocalDate.now().plusDays(3), 8, CourseStatus.OPEN);
-        Mockito.when(courseDAO.delete(course)).thenReturn(true);
 
         assertEquals(true, courseService.deleteCourse(course));
-        Mockito.verify(courseDAO).delete(course);
+        Mockito.verify(courseRepository).delete(course);
     }
 
     @Test
     void deleteCourseWithNullCourse() {
         assertThrows(IllegalArgumentException.class, () -> courseService.deleteCourse(null));
-        Mockito.verify(courseDAO, Mockito.never()).delete(Mockito.any());
+        Mockito.verify(courseRepository, Mockito.never()).delete(Mockito.any());
     }
 
     @Test
@@ -74,82 +73,81 @@ class CourseServiceImplTest {
         Course course = new Course(null, CourseType.CI, LocalDate.now(), LocalDate.now().plusDays(3), 8, CourseStatus.OPEN);
 
         assertThrows(IllegalArgumentException.class, () -> courseService.deleteCourse(course));
-        Mockito.verify(courseDAO, Mockito.never()).delete(Mockito.any());
+        Mockito.verify(courseRepository, Mockito.never()).delete(Mockito.any());
     }
 
     @Test
     void deleteCourseById() {
         UUID id = UUID.randomUUID();
-        Mockito.when(courseDAO.deleteById(id)).thenReturn(true);
 
         assertEquals(true, courseService.deleteCourseById(id));
-        Mockito.verify(courseDAO).deleteById(id);
+        Mockito.verify(courseRepository).deleteById(id);
     }
 
     @Test
     void deleteCourseByIdWithNullId() {
         assertThrows(IllegalArgumentException.class, () -> courseService.deleteCourseById(null));
-        Mockito.verify(courseDAO, Mockito.never()).deleteById(Mockito.any());
+        Mockito.verify(courseRepository, Mockito.never()).deleteById(Mockito.any());
     }
 
     @Test
     void getCourseByType() {
         CourseType courseType = CourseType.CI;
-        Collection<Course> list = new ArrayList<>();
+        List<Course> list = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             list.add(new Course(UUID.randomUUID(), courseType, LocalDate.now(), LocalDate.now().plusDays(3), 8, CourseStatus.OPEN));
         }
 
-        Mockito.when(courseDAO.getByCourseType(courseType)).thenReturn(list);
+        Mockito.when(courseRepository.findAllByCourseType(courseType)).thenReturn(list);
 
         assertIterableEquals(list, courseService.getCourseByType(courseType));
-        Mockito.verify(courseDAO).getByCourseType(courseType);
+        Mockito.verify(courseRepository).findAllByCourseType(courseType);
 
     }
 
     @Test
     void getCourseByTypeWithNullType() {
         assertThrows(IllegalArgumentException.class, () -> courseService.getCourseByType(null));
-        Mockito.verify(courseDAO, Mockito.never()).getByCourseType(Mockito.any());
+        Mockito.verify(courseRepository, Mockito.never()).findAllByCourseType(Mockito.any());
     }
 
     @Test
     void getCourseById() {
         UUID id = UUID.randomUUID();
         Course course = new Course(id, CourseType.CI, LocalDate.now(), LocalDate.now().plusDays(3), 8, CourseStatus.OPEN);
-        Mockito.when(courseDAO.getById(id)).thenReturn(course);
+        Mockito.when(courseRepository.findById(id)).thenReturn(Optional.of(course));
 
         assertEquals(course, courseService.getCourseById(id));
-        Mockito.verify(courseDAO).getById(id);
+        Mockito.verify(courseRepository).findById(id);
     }
 
     @Test
     void getCourseByIdWithNullId() {
         assertThrows(IllegalArgumentException.class, () -> courseService.getCourseById(null));
-        Mockito.verify(courseDAO, Mockito.never()).getById(Mockito.any());
+        Mockito.verify(courseRepository, Mockito.never()).findById(Mockito.any());
     }
 
     @Test
     void getCourseByIdWithNotExistingId() {
         UUID id = UUID.randomUUID();
 
-        Mockito.when(courseDAO.getById(id)).thenReturn(null);
+        Mockito.when(courseRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> courseService.getCourseById(id));
-        Mockito.verify(courseDAO).getById(id);
+        Mockito.verify(courseRepository).findById(id);
     }
 
     @Test
     void getAll() {
-        Collection<Course> list = new ArrayList<>();
+        List<Course> list = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             list.add(new Course(UUID.randomUUID(), CourseType.CI, LocalDate.now(), LocalDate.now().plusDays(3), 8, CourseStatus.OPEN));
         }
 
-        Mockito.when(courseDAO.getAll()).thenReturn(list);
+        Mockito.when(courseRepository.findAll()).thenReturn(list);
 
         assertIterableEquals(list, courseService.getAll());
-        Mockito.verify(courseDAO).getAll();
+        Mockito.verify(courseRepository).findAll();
     }
 
     @Test
@@ -160,15 +158,15 @@ class CourseServiceImplTest {
         String email = "test@mail.ru";
         Student student = new Student(UUID.randomUUID(), email);
 
-        Mockito.when(studentDAO.getStudentByEmail(email)).thenReturn(student);
-        Mockito.when(courseDAO.enroll(id, student)).thenReturn(true);
-        Mockito.when(courseDAO.getById(id)).thenReturn(course);
+        Mockito.when(studentRepository.findByEmail(email)).thenReturn(Optional.of(student));
+        Mockito.when(courseRepository.save(course)).thenReturn(course);
+        Mockito.when(courseRepository.findById(id)).thenReturn(Optional.of(course));
 
         assertEquals(true, courseService.enroll(id, email));
-        Mockito.verify(courseDAO).getById(id);
-        Mockito.verify(studentDAO).getStudentByEmail(email);
-        Mockito.verify(courseDAO).enroll(id, student);
-        Mockito.verify(studentDAO, Mockito.never()).create(Mockito.any(Student.class));
+        Mockito.verify(courseRepository).findById(id);
+        Mockito.verify(studentRepository).findByEmail(email);
+        Mockito.verify(courseRepository).save(course);
+        Mockito.verify(studentRepository, Mockito.never()).save(Mockito.any(Student.class));
     }
 
     @Test
@@ -179,16 +177,16 @@ class CourseServiceImplTest {
         String email = "test@mail.ru";
         Student student = new Student(UUID.randomUUID(), email);
 
-        Mockito.when(studentDAO.getStudentByEmail(email)).thenReturn(null);
-        Mockito.when(studentDAO.create(Mockito.any(Student.class))).thenReturn(student);
-        Mockito.when(courseDAO.enroll(Mockito.eq(id), Mockito.any(Student.class))).thenReturn(true);
-        Mockito.when(courseDAO.getById(id)).thenReturn(course);
+        Mockito.when(studentRepository.findByEmail(email)).thenReturn(Optional.empty());
+        Mockito.when(studentRepository.save(Mockito.any(Student.class))).thenReturn(student);
+        Mockito.when(courseRepository.save(course)).thenReturn(course);
+        Mockito.when(courseRepository.findById(id)).thenReturn(Optional.of(course));
 
         assertEquals(true, courseService.enroll(id, email));
-        Mockito.verify(courseDAO).getById(id);
-        Mockito.verify(studentDAO).getStudentByEmail(email);
-        Mockito.verify(courseDAO).enroll(Mockito.eq(id), Mockito.any(Student.class));
-        Mockito.verify(studentDAO).create(Mockito.any(Student.class));
+        Mockito.verify(courseRepository).findById(id);
+        Mockito.verify(studentRepository).findByEmail(email);
+        Mockito.verify(courseRepository).save(course);
+        Mockito.verify(studentRepository).save(Mockito.any(Student.class));
     }
 
     @Test
@@ -197,18 +195,18 @@ class CourseServiceImplTest {
         assertThrows(IllegalArgumentException.class, () -> courseService.enroll(UUID.randomUUID(), ""));
         assertThrows(IllegalArgumentException.class, () -> courseService.enroll(UUID.randomUUID(), null));
         assertThrows(IllegalArgumentException.class, () -> courseService.enroll(null, null));
-        Mockito.verify(courseDAO, Mockito.never()).enroll(Mockito.any(), Mockito.any());
+        Mockito.verify(courseRepository, Mockito.never()).save(Mockito.any());
     }
 
     @Test
     void enrollWithNotExistingCourse() {
         UUID id = UUID.randomUUID();
 
-        Mockito.when(courseDAO.getById(id)).thenReturn(null);
+        Mockito.when(courseRepository.findById(id)).thenReturn(null);
 
         assertThrows(RuntimeException.class, () -> courseService.enroll(id, "test@mail.ru"));
-        Mockito.verify(courseDAO).getById(id);
-        Mockito.verify(courseDAO, Mockito.never()).enroll(Mockito.any(), Mockito.any());
-        Mockito.verify(studentDAO, Mockito.never()).create(Mockito.any(Student.class));
+        Mockito.verify(courseRepository).findById(id);
+        Mockito.verify(courseRepository, Mockito.never()).save(Mockito.any());
+        Mockito.verify(studentRepository, Mockito.never()).save(Mockito.any(Student.class));
     }
 }
