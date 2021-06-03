@@ -20,10 +20,11 @@
     <tbody>
     <% List<Course> courses = (List<Course>)request.getAttribute("foundedCourses");
         for(int i = 0; i < courses.size(); i++) {
-            Course course = courses.get(i);%>
+            Course course = courses.get(i);
+    %>
         <tr>
             <td>
-                <a href="show?id=<%=course.getId()%>"><%=(i + 1)%></a>
+                <a href="info/<%=course.getId()%>"><%=(i + 1)%></a>
             </td>
             <td>
                 <%=course.getCourseType().getDescription()%>

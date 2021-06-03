@@ -3,7 +3,6 @@
 <html>
 <head>
     <title>Информация о курсе</title>
-    <%@ page isELIgnored="false" %>
 </head>
 <body>
 <h1>${message}</h1>
@@ -17,7 +16,7 @@
     </br></br>
     Кол-во мест: <%=course.getMaxStudentsCount()%>
     </br></br>
-    <a href="enroll?id=<%=course.getId()%>">Запись</a>
+    <a href="../enroll/<%=course.getId()%>">Запись</a>
 </form>
 </body>
 </html>

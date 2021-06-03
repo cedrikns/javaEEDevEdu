@@ -6,10 +6,9 @@
 </head>
 <body>
 <h1>Запись на курс:</h1>
-<form action="enroll-confirm">
+<form action="../enroll-confirm/${courseId}">
     Введите электронный адрес участника
     </br></br>
-    <input type="hidden" name="id" value="${courseId}" />
     <input type="text" name="studentEmail"/>
     </br></br>
     <input type="submit" name="enroll" value="Записать">

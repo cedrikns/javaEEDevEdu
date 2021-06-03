@@ -13,6 +13,8 @@ spring:
     view:
       suffix: .jsp
     log-request-details: true
+    format:
+      date: iso
 
 logging:
   level:

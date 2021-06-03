@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.tsedrik.dao.CourseDAO;
 import ru.tsedrik.dao.StudentDAO;
 import ru.tsedrik.entity.Course;
+import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
 import ru.tsedrik.entity.Student;
 
@@ -27,6 +28,8 @@ public class CourseServiceImpl implements CourseService{
         if (course == null){
             throw new IllegalArgumentException("Added course can't be null.");
         }
+        course.setId(UUID.randomUUID());
+        course.setCourseStatus(CourseStatus.OPEN);
         return courseDAO.create(course);
     }
 
