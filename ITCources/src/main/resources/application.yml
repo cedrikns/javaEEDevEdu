@@ -43,3 +43,6 @@ logging:
     ROOT: INFO
     ru.tsedrik: DEBUG
     org.springframework: DEBUG
+    web.servlet: DEBUG
+    org.apache.jasper.servlet: DEBUG
+
