@@ -1,25 +1,29 @@
 package ru.tsedrik.service;
 
 import org.springframework.stereotype.Service;
-import ru.tsedrik.dao.CourseDAO;
-import ru.tsedrik.dao.StudentDAO;
+import org.springframework.transaction.annotation.Transactional;
 import ru.tsedrik.entity.Course;
+import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
 import ru.tsedrik.entity.Student;
+import ru.tsedrik.repository.CourseRepository;
+import ru.tsedrik.repository.StudentRepository;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class CourseServiceImpl implements CourseService{
 
-    private CourseDAO courseDAO;
+    private CourseRepository courseRepository;
 
-    private StudentDAO studentDAO;
+    private StudentRepository studentRepository;
 
-    public CourseServiceImpl(CourseDAO courseDAO, StudentDAO studentDAO) {
-        this.courseDAO = courseDAO;
-        this.studentDAO = studentDAO;
+    public CourseServiceImpl(CourseRepository courseRepository, StudentRepository studentRepository) {
+        this.courseRepository = courseRepository;
+        this.studentRepository = studentRepository;
     }
 
     @Override
@@ -27,7 +31,9 @@ public class CourseServiceImpl implements CourseService{
         if (course == null){
             throw new IllegalArgumentException("Added course can't be null.");
         }
-        return courseDAO.create(course);
+        course.setId(UUID.randomUUID());
+        course.setCourseStatus(CourseStatus.OPEN);
+        return courseRepository.save(course);
     }
 
     @Override
@@ -35,7 +41,8 @@ public class CourseServiceImpl implements CourseService{
         if (course == null || course.getId() == null){
             throw new IllegalArgumentException("Deleted course and its id can't be null.");
         }
-        return courseDAO.delete(course);
+        courseRepository.delete(course);
+        return true;
     }
 
     @Override
@@ -43,7 +50,8 @@ public class CourseServiceImpl implements CourseService{
         if (id == null){
             throw new IllegalArgumentException("Deleted course's id can't be null.");
         }
-        return courseDAO.deleteById(id);
+        courseRepository.deleteById(id);
+        return true;
     }
 
     @Override
@@ -51,7 +59,7 @@ public class CourseServiceImpl implements CourseService{
         if (type == null){
             throw new IllegalArgumentException("Type can't be null.");
         }
-        return courseDAO.getByCourseType(type);
+        return courseRepository.findAllByCourseType(type);
     }
 
     @Override
@@ -60,17 +68,15 @@ public class CourseServiceImpl implements CourseService{
             throw new IllegalArgumentException("Course's id can't be null.");
         }
 
-        Course course = courseDAO.getById(id);
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("There wasn't found course with id = " + id + "."));
 
-        if (course == null){
-            throw new RuntimeException("There wasn't found course with id = " + id + ".");
-        }
         return course;
     }
 
     @Override
     public Collection<Course> getAll() {
-        return courseDAO.getAll();
+        return courseRepository.findAll();
     }
 
     public boolean enroll(UUID courseId, String email){
@@ -79,20 +85,31 @@ public class CourseServiceImpl implements CourseService{
             throw new IllegalArgumentException("Course's id and email can't be null or empty.");
         }
 
-        Course course = courseDAO.getById(courseId);
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("There wasn't found course with id = " + courseId + "."));
 
-        if (course == null){
-            throw new RuntimeException("There wasn't found course with id = " + courseId + ".");
+        if (course.getCourseStatus() == CourseStatus.CLOSE){
+            throw new IllegalArgumentException("This course is closed. Please, choose another one.");
         }
 
-        Student enrolledStudent = studentDAO.getStudentByEmail(email);
-        if (enrolledStudent == null){
-            enrolledStudent = new Student(UUID.randomUUID(), email);
-            studentDAO.create(enrolledStudent);
+        Student enrolledStudent = studentRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    Student student = new Student(UUID.randomUUID(), email);
+                    studentRepository.save(student);
+                    return student;
+                });
+
+        Optional<UUID> existedStudentId = course.getStudents().stream()
+                    .map(s -> s.getId())
+                    .filter(id -> id.equals(enrolledStudent.getId()))
+                    .findAny();
+        if (existedStudentId.isPresent()){
+            return false;
+        } else {
+            course.getStudents().add(enrolledStudent);
+            courseRepository.save(course);
+            return true;
         }
 
-        boolean isEnrolled = courseDAO.enroll(courseId, enrolledStudent);
-
-        return isEnrolled;
     }
 }

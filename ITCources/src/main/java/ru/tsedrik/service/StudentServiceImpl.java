@@ -1,18 +1,18 @@
 package ru.tsedrik.service;
 
 import org.springframework.stereotype.Service;
-import ru.tsedrik.dao.StudentDAO;
 import ru.tsedrik.entity.Student;
+import ru.tsedrik.repository.StudentRepository;
 
 import java.util.UUID;
 
 @Service
 public class StudentServiceImpl implements StudentService{
 
-    private StudentDAO studentDAO;
+    private StudentRepository studentRepository;
 
-    public StudentServiceImpl(StudentDAO studentDAO){
-        this.studentDAO = studentDAO;
+    public StudentServiceImpl(StudentRepository studentRepository){
+        this.studentRepository = studentRepository;
     }
 
     @Override
@@ -21,7 +21,7 @@ public class StudentServiceImpl implements StudentService{
             throw new IllegalArgumentException("Email can't be null.");
         }
         Student student = new Student(UUID.randomUUID(), email);
-        return studentDAO.create(student);
+        return studentRepository.save(student);
     }
 
     @Override
@@ -29,10 +29,9 @@ public class StudentServiceImpl implements StudentService{
         if (id == null){
             throw new IllegalArgumentException("Student's id can't be null.");
         }
-        Student student = studentDAO.getById(id);
-        if (student == null){
-            throw new RuntimeException("There is no student with id = " + id);
-        }
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("There is no student with id = " + id));
+
         return student;
     }
 
@@ -41,7 +40,8 @@ public class StudentServiceImpl implements StudentService{
         if (id == null){
             throw new IllegalArgumentException("Student's id can't be null.");
         }
-        return studentDAO.deleteById(id);
+        studentRepository.deleteById(id);
+        return true;
     }
 
     @Override
@@ -49,7 +49,8 @@ public class StudentServiceImpl implements StudentService{
         if (student == null || student.getId() == null){
             throw new IllegalArgumentException("Deleted student and its id can't be null.");
         }
-        return studentDAO.delete(student);
+        studentRepository.delete(student);
+        return true;
     }
 
 }
