@@ -1,0 +1,51 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="1" author="Natallia Tsedrik">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="users"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="users"
+                     remarks="Таблица зарегистрированных пользователей">
+            <column name="id" type="bigint"
+                    remarks="Идентификатор записи">
+                <constraints primaryKey="true"
+                             primaryKeyName="user_pk"
+                             nullable="false"/>
+            </column>
+            <column name="username" type="varchar(255)"
+                    remarks="Имя пользователя">
+            </column>
+            <column name="password" type="varchar(255)"
+                    remarks="Пароль пользователя">
+            </column>
+            <column name="role" type="varchar(255)"
+                    remarks="Роль пользователя">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <comment>Задача по созданию пользователя системы</comment>
+    </changeSet>
+
+    <changeSet id="2" author="Natallia Tsedrik">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="users" indexName="users_usersname_idx"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="users" indexName="users_usersname_idx">
+            <column name="username"/>
+        </createIndex>
+        <comment>Индекс для поиска по имени пользователя</comment>
+    </changeSet>
+
+</databaseChangeLog>

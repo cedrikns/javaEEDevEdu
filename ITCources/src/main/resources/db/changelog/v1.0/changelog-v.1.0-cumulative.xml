@@ -7,5 +7,6 @@
     <include file="student.xml" relativeToChangelogFile="true"/>
     <include file="course.xml" relativeToChangelogFile="true"/>
     <include file="course_student.xml" relativeToChangelogFile="true"/>
+    <include file="users.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
