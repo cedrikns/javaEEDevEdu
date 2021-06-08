@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.tsedrik.entity.Student;
+import ru.tsedrik.exception.StudentNotFoundException;
 import ru.tsedrik.repository.StudentRepository;
 
 import java.util.Optional;
@@ -75,9 +76,12 @@ class StudentServiceImplTest {
     @Test
     void deleteStudentById() {
         UUID id = UUID.randomUUID();
+        Student student = new Student(id, "test@mail.ru");
+        Mockito.when(studentRepository.findById(id)).thenReturn(Optional.of(student));
 
         assertEquals(true, studentService.deleteStudentById(id));
         Mockito.verify(studentRepository).deleteById(id);
+        Mockito.verify(studentRepository).findById(id);
     }
 
     @Test
@@ -87,12 +91,25 @@ class StudentServiceImplTest {
     }
 
     @Test
+    void deleteStudentByIdWithNotExistingStudent() {
+        UUID id = UUID.randomUUID();
+        Mockito.when(studentRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(StudentNotFoundException.class, () -> studentService.deleteStudentById(id));
+        Mockito.verify(studentRepository, Mockito.never()).deleteById(id);
+        Mockito.verify(studentRepository).findById(id);
+    }
+
+    @Test
     void deleteStudent() {
         UUID id = UUID.randomUUID();
         Student student = new Student(id, "test@mail.ru");
+        Mockito.when(studentRepository.findById(id)).thenReturn(Optional.of(student));
+
 
         assertEquals(true, studentService.deleteStudent(student));
         Mockito.verify(studentRepository).delete(student);
+        Mockito.verify(studentRepository).findById(id);
     }
 
     @Test
@@ -107,5 +124,16 @@ class StudentServiceImplTest {
 
         assertThrows(IllegalArgumentException.class, () -> studentService.deleteStudent(student));
         Mockito.verify(studentRepository, Mockito.never()).delete(Mockito.any());
+    }
+
+    @Test
+    void deleteStudentWithNotExistingStudent() {
+        UUID id = UUID.randomUUID();
+        Student student = new Student(id, "test@mail.ru");
+        Mockito.when(studentRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(StudentNotFoundException.class, () -> studentService.deleteStudent(student));
+        Mockito.verify(studentRepository, Mockito.never()).delete(student);
+        Mockito.verify(studentRepository).findById(id);
     }
 }

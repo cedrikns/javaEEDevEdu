@@ -6,6 +6,8 @@ import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
 import ru.tsedrik.entity.Student;
+import ru.tsedrik.exception.CourseNotAvailableForChangeException;
+import ru.tsedrik.exception.CourseNotFoundException;
 import ru.tsedrik.repository.CourseRepository;
 import ru.tsedrik.repository.StudentRepository;
 
@@ -14,7 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class CourseServiceImpl implements CourseService{
 
     private CourseRepository courseRepository;
@@ -27,6 +29,7 @@ public class CourseServiceImpl implements CourseService{
     }
 
     @Override
+    @Transactional(readOnly = false)
     public Course addCourse(Course course) {
         if (course == null){
             throw new IllegalArgumentException("Added course can't be null.");
@@ -37,19 +40,25 @@ public class CourseServiceImpl implements CourseService{
     }
 
     @Override
+    @Transactional(readOnly = false)
     public boolean deleteCourse(Course course) {
         if (course == null || course.getId() == null){
             throw new IllegalArgumentException("Deleted course and its id can't be null.");
         }
+        courseRepository.findById(course.getId())
+                .orElseThrow(() -> new CourseNotFoundException("There wasn't found course with id = " + course.getId() + "."));
         courseRepository.delete(course);
         return true;
     }
 
     @Override
+    @Transactional(readOnly = false)
     public boolean deleteCourseById(UUID id) {
         if (id == null){
             throw new IllegalArgumentException("Deleted course's id can't be null.");
         }
+        courseRepository.findById(id)
+                .orElseThrow(() -> new CourseNotFoundException("There wasn't found course with id = " + id + "."));
         courseRepository.deleteById(id);
         return true;
     }
@@ -69,7 +78,7 @@ public class CourseServiceImpl implements CourseService{
         }
 
         Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("There wasn't found course with id = " + id + "."));
+                .orElseThrow(() -> new CourseNotFoundException("There wasn't found course with id = " + id + "."));
 
         return course;
     }
@@ -79,6 +88,8 @@ public class CourseServiceImpl implements CourseService{
         return courseRepository.findAll();
     }
 
+    @Override
+    @Transactional(readOnly = false)
     public boolean enroll(UUID courseId, String email){
 
         if (courseId == null || email == null || email.isEmpty()){
@@ -86,10 +97,10 @@ public class CourseServiceImpl implements CourseService{
         }
 
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("There wasn't found course with id = " + courseId + "."));
+                .orElseThrow(() -> new CourseNotFoundException("There wasn't found course with id = " + courseId + "."));
 
         if (course.getCourseStatus() == CourseStatus.CLOSE){
-            throw new IllegalArgumentException("This course is closed. Please, choose another one.");
+            throw new CourseNotAvailableForChangeException("This course is closed. Please, choose another one.");
         }
 
         Student enrolledStudent = studentRepository.findByEmail(email)

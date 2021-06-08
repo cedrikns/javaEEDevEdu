@@ -1,11 +1,13 @@
 package ru.tsedrik.controller;
 
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseType;
+import ru.tsedrik.exception.CourseNotFoundException;
 import ru.tsedrik.service.CourseService;
 
 import java.util.Arrays;
@@ -33,6 +35,7 @@ public class CourseController {
     }
 
     @GetMapping("/create")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public String courseCreate(Model model) {
         Course course = new Course();
         model.addAttribute("course", course);
@@ -62,12 +65,13 @@ public class CourseController {
             model.addAttribute("course", course);
             model.addAttribute("message", "Информация о выбранном курсе:");
         } else {
-            throw new IllegalArgumentException("Course with id = " + id + " wasn't found.");
+            throw new CourseNotFoundException("Course with id = " + id + " wasn't found.");
         }
         return "../course-info";
     }
 
     @PostMapping("/save-course")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public String saveCourse(@ModelAttribute("course") Course course, Model model){
         model.addAttribute("message", "Информация о созданном курсе:");
         course = courseService.addCourse(course);
@@ -83,7 +87,7 @@ public class CourseController {
             model.addAttribute("course", course);
             return "../course-enroll";
         } else {
-            throw new IllegalArgumentException("Course with id = " + id + " wasn't found.");
+            throw new CourseNotFoundException("Course with id = " + id + " wasn't found.");
         }
     }
 
