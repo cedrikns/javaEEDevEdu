@@ -11,12 +11,13 @@ server:
 spring:
   mvc:
     view:
+      prefix: /WEB-INF/jsp/
       suffix: .jsp
     log-request-details: true
     format:
       date: iso
   datasource:
-    url: jdbc:postgresql://localhost:5432/javaee
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/javaee}
     username: postgres
     password: postgres
     driverClassName: org.postgresql.Driver

@@ -67,7 +67,7 @@ public class CourseController {
         } else {
             throw new CourseNotFoundException("Course with id = " + id + " wasn't found.");
         }
-        return "../course-info";
+        return "course-info";
     }
 
     @PostMapping("/save-course")
@@ -85,7 +85,7 @@ public class CourseController {
         if (course != null) {
             model.addAttribute("courseId", id);
             model.addAttribute("course", course);
-            return "../course-enroll";
+            return "course-enroll";
         } else {
             throw new CourseNotFoundException("Course with id = " + id + " wasn't found.");
         }
@@ -99,7 +99,7 @@ public class CourseController {
         } else {
             model.addAttribute("message", "Запись не удалась.");
         }
-        return "../enroll-result";
+        return "enroll-result";
     }
 
 }
