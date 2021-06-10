@@ -1,0 +1,33 @@
+<configuration>
+
+    <springProperty name="LOG_PATH" source="logging.appenders.file.path" defaultValue="log"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <springProperty scope="context" name="FILE_NAME" source="logging.appenders.file.fileName" defaultValue="it-courses"/>
+    <springProperty scope="context" name="MAX_HISTORY" source="logging.appenders.file.maxHistory" defaultValue="300"/>
+
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+
+        <file>${LOG_PATH}/${FILE_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${FILE_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="console"/>
+        <appender-ref ref="file"/>
+    </root>
+
+</configuration>

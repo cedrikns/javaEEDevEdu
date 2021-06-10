@@ -46,4 +46,7 @@ logging:
     org.springframework: DEBUG
     web.servlet: DEBUG
     org.apache.jasper.servlet: DEBUG
+  appenders:
+    file:
+      maxHistory: 1000
 
