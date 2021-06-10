@@ -13,6 +13,30 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     /**
+     * Метод для перехвата и обработки исключения CourseNotFoundException
+     */
+    @ExceptionHandler({CourseNotFoundException.class, StudentNotFoundException.class})
+    public ResponseEntity<ResponseError> entityNotFoundException(RuntimeException e){
+        ResponseError responseError = new ResponseError(System.currentTimeMillis(),
+                e.getMessage(),
+                "entityNotFoundException");
+
+        return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Метод для перехвата и обработки исключения CourseNotAvailableForChangeException
+     */
+    @ExceptionHandler(CourseNotAvailableForChangeException.class)
+    public ResponseEntity<ResponseError> courseNotAvailableForChangeException(CourseNotAvailableForChangeException e){
+        ResponseError responseError = new ResponseError(System.currentTimeMillis(),
+                e.getMessage(),
+                "courseNotAvailableForChangeException");
+
+        return new ResponseEntity<>(responseError, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Метод для перехвата и обработки исключения IllegalArgumentException
      */
     @ExceptionHandler(IllegalArgumentException.class)

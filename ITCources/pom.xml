@@ -86,24 +86,18 @@
   </dependencies>
 
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
     <plugins>
       <plugin>
-        <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-maven-plugin</artifactId>
-        <version>4.1.1</version>
-        <configuration>
-          <propertyFile>liquibase.properties</propertyFile>
-          <changeLogFile>/db/changelog/changelog-master.xml</changeLogFile>
-          <verbose>true</verbose>
-          <logging>debug</logging>
-          <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-        </configuration>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>build-info</id>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

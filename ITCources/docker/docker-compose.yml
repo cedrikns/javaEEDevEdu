@@ -1,0 +1,26 @@
+version: "2"
+services:
+  app:
+    image: 'it-courses-app:latest'
+    build:
+      context: .
+    container_name: it-courses
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/javaee
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+#      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - 8080:8080
+
+  postgres:
+    image: postgres:12.4
+    container_name: docker_postgres_1
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=javaee
+    ports:
+      - 5432:5432

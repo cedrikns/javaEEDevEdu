@@ -10,6 +10,7 @@ import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
 import ru.tsedrik.entity.Student;
+import ru.tsedrik.exception.CourseNotFoundException;
 import ru.tsedrik.repository.CourseRepository;
 import ru.tsedrik.repository.StudentRepository;
 
@@ -57,9 +58,11 @@ class CourseServiceImplTest {
     void deleteCourse() {
         UUID id = UUID.randomUUID();
         Course course = new Course(id, CourseType.CI, LocalDate.now(), LocalDate.now().plusDays(3), 8, CourseStatus.OPEN);
+        Mockito.when(courseRepository.findById(id)).thenReturn(Optional.of(course));
 
         assertEquals(true, courseService.deleteCourse(course));
         Mockito.verify(courseRepository).delete(course);
+        Mockito.verify(courseRepository).findById(id);
     }
 
     @Test
@@ -77,17 +80,41 @@ class CourseServiceImplTest {
     }
 
     @Test
+    void deleteCourseWithNotExistingCourse() {
+        UUID id = UUID.randomUUID();
+        Course course = new Course(id, CourseType.CI, LocalDate.now(), LocalDate.now().plusDays(3), 8, CourseStatus.OPEN);
+        Mockito.when(courseRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(CourseNotFoundException.class, () -> courseService.deleteCourse(course));
+        Mockito.verify(courseRepository, Mockito.never()).delete(course);
+        Mockito.verify(courseRepository).findById(id);
+    }
+
+    @Test
     void deleteCourseById() {
         UUID id = UUID.randomUUID();
+        Course course = new Course(id, CourseType.CI, LocalDate.now(), LocalDate.now().plusDays(3), 8, CourseStatus.OPEN);
+        Mockito.when(courseRepository.findById(id)).thenReturn(Optional.of(course));
 
         assertEquals(true, courseService.deleteCourseById(id));
         Mockito.verify(courseRepository).deleteById(id);
+        Mockito.verify(courseRepository).findById(id);
     }
 
     @Test
     void deleteCourseByIdWithNullId() {
         assertThrows(IllegalArgumentException.class, () -> courseService.deleteCourseById(null));
         Mockito.verify(courseRepository, Mockito.never()).deleteById(Mockito.any());
+    }
+
+    @Test
+    void deleteCourseByIdWithNotExistingCourse() {
+        UUID id = UUID.randomUUID();
+        Mockito.when(courseRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(CourseNotFoundException.class, () -> courseService.deleteCourseById(id));
+        Mockito.verify(courseRepository, Mockito.never()).deleteById(id);
+        Mockito.verify(courseRepository).findById(id);
     }
 
     @Test
