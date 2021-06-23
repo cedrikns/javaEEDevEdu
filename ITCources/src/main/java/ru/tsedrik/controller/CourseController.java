@@ -44,7 +44,7 @@ public class CourseController {
     @GetMapping("/create")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public String courseCreate(Model model) {
-        logger.debug("courseCreate - start ", model);
+        logger.debug("courseCreate - start ");
         Course course = new Course();
         model.addAttribute("course", course);
         model.addAttribute("courseTypes", Arrays.asList(CourseType.values()));
