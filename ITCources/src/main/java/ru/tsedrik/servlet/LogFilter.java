@@ -1,24 +1,26 @@
 package ru.tsedrik.servlet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.logging.Logger;
 
 @WebFilter("/*")
 public class LogFilter implements Filter {
 
-    private Logger logger = Logger.getLogger(LogFilter.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(LogFilter.class.getName());
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        logger.warning("init logFilter");
+        logger.info("init logFilter");
     }
 
     @Override
     public void destroy() {
-        logger.warning("destroy logFilter");
+        logger.info("destroy logFilter");
     }
 
     @Override
@@ -26,9 +28,9 @@ public class LogFilter implements Filter {
 
         HttpServletRequest req = (HttpServletRequest)servletRequest;
         String uri = "Requested uri :: " + req.getRequestURI();
-        logger.warning(uri);
+        logger.info(uri);
         String method = "Requested method :: " + req.getMethod();
-        logger.warning(method);
+        logger.info(method);
         filterChain.doFilter(servletRequest, servletResponse);
     }
 }
