@@ -1,7 +1,9 @@
 package ru.tsedrik.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.tsedrik.broker.Sender;
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
@@ -23,9 +25,15 @@ public class CourseServiceImpl implements CourseService{
 
     private StudentRepository studentRepository;
 
-    public CourseServiceImpl(CourseRepository courseRepository, StudentRepository studentRepository) {
+    private Sender sender;
+
+    @Value("${it.jms.course.queue}")
+    private String sendCourseTopic;
+
+    public CourseServiceImpl(CourseRepository courseRepository, StudentRepository studentRepository, Sender sender) {
         this.courseRepository = courseRepository;
         this.studentRepository = studentRepository;
+        this.sender = sender;
     }
 
     @Override
@@ -36,7 +44,10 @@ public class CourseServiceImpl implements CourseService{
         }
         course.setId(UUID.randomUUID());
         course.setCourseStatus(CourseStatus.OPEN);
-        return courseRepository.save(course);
+
+        Course savedCourse = courseRepository.save(course);
+        sender.sendMessage(sendCourseTopic, course);
+        return savedCourse;
     }
 
     @Override

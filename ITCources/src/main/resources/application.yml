@@ -38,6 +38,10 @@ spring:
       default_schema: public
       use_sql_comments: true
       format_sql: true
+  activemq:
+    broker-url: "tcp://localhost:61616"
+    password: admin
+    user: admin
 
 logging:
   level:
@@ -49,4 +53,10 @@ logging:
   appenders:
     file:
       maxHistory: 1000
+
+it:
+  jms:
+    course:
+      queue: "it.jms.course"
+
 

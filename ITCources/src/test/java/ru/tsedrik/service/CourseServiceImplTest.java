@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.tsedrik.broker.Sender;
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseStatus;
 import ru.tsedrik.entity.CourseType;
@@ -26,12 +27,14 @@ class CourseServiceImplTest {
     CourseRepository courseRepository;
     @Mock
     StudentRepository studentRepository;
+    @Mock
+    Sender sender;
 
     CourseServiceImpl courseService;
 
     @BeforeEach
     void setUp() {
-        courseService = new CourseServiceImpl(courseRepository, studentRepository);
+        courseService = new CourseServiceImpl(courseRepository, studentRepository, sender);
     }
 
     @Test
