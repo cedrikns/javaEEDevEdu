@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.tsedrik.entity.Course;
 import ru.tsedrik.entity.CourseType;
 import ru.tsedrik.exception.CourseNotFoundException;
+import ru.tsedrik.mongodb.MongoDbLog;
 import ru.tsedrik.service.CourseService;
 
 import java.util.Arrays;
@@ -28,12 +29,14 @@ public class CourseController {
     }
 
     @GetMapping("/")
+    @MongoDbLog
     public String home() {
         logger.debug("enter to home page");
         return "home";
     }
 
     @GetMapping("/search")
+    @MongoDbLog
     public String courseSearch(Model model) {
         logger.debug("courseSearch - start ");
         model.addAttribute("courseTypes", Arrays.asList(CourseType.values()));
@@ -43,6 +46,7 @@ public class CourseController {
 
     @GetMapping("/create")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @MongoDbLog
     public String courseCreate(Model model) {
         logger.debug("courseCreate - start ", model);
         Course course = new Course();
@@ -53,6 +57,7 @@ public class CourseController {
     }
 
     @GetMapping("/courses-list")
+    @MongoDbLog
     public String coursesList(@RequestParam String courseType, Model model) {
         logger.debug("coursesList with {} - start ", courseType);
         Collection<Course> foundedCourses;
@@ -69,6 +74,7 @@ public class CourseController {
     }
 
     @GetMapping(value = "/info/{id}")
+    @MongoDbLog
     public String getCourseInfo(@PathVariable @NonNull UUID id, Model model) {
         logger.debug("getCourseInfo with {} - start ", id);
         Course course = courseService.getCourseById(id);
@@ -85,6 +91,7 @@ public class CourseController {
 
     @PostMapping("/save-course")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @MongoDbLog
     public String saveCourse(@ModelAttribute("course") Course course, Model model){
         logger.debug("saveCourse with {} - start ", course);
         model.addAttribute("message", "Информация о созданном курсе:");
@@ -95,6 +102,7 @@ public class CourseController {
     }
 
     @GetMapping("/enroll/{id}")
+    @MongoDbLog
     public String enroll(@PathVariable @NonNull UUID id, Model model) {
         logger.debug("enroll with {} - start ", id);
         Course course = courseService.getCourseById(id);
@@ -109,6 +117,7 @@ public class CourseController {
     }
 
     @GetMapping("/enroll-confirm/{id}")
+    @MongoDbLog
     public String confirmEnroll(@PathVariable @NonNull UUID id, @RequestParam String studentEmail, Model model) {
         logger.debug("confirmEnroll with {} and {} - start ", id, studentEmail);
         boolean isEnrolled = courseService.enroll(id, studentEmail);

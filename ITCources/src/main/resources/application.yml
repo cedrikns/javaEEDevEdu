@@ -38,6 +38,12 @@ spring:
       default_schema: public
       use_sql_comments: true
       format_sql: true
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: mydb
+
 
 logging:
   level:
